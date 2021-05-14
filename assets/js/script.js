@@ -18,77 +18,82 @@ var checkTime = function() {
     for(i = 0; i <= 8; i++) {
         var currentTime = $('#' + i + ' .hour').text();
 
-        var convertedTime = moment(currentTime, 'hA').format('h:mm A');
+        var convertedTime = moment(currentTime, 'hA').format('hh:mm:ss');
 
         console.log(convertedTime);
 
         //apply new class & styles based on time slot
-      if (moment().isAfter(convertedTime)) {
+      if (convertedTime.isAfter(moment())) {
         $('#' + i + '.description').addClass('past');
         $('#' + i + '.description').removeClass('present');
       }
-      else if(moment().isBefore(convertedTime)) {
+      else if(convertedTime.isBefore(moment())) {
         $('#' + i + '.description').addClass('future');
       }
-      else if (moment() == convertedTime) {
+      else if (moment().isSame(convertedTime)) {
           $('#' + i + '.description').addClass('present');
           $('#' + i + '.description').removeClass('future');
       }
     }
 }
-checkTime();
+//checkTime();
 
 //check the time slots every 5 min
-setInterval(checkTime, (1000*60) * 5);
+//setInterval(checkTime, (1000*60) * 5);
 
 
 
 
 //save input information to local storage
 var saveDescription = function() {
-   
+    //get the description of the time slot
     var scheduleDescription = $('.description').val();
-    
+    //get the id of the parent
+    var descriptionId = $(this).parent().attr('id');
+
 
     //load data from local storage
     var loadSchedule = JSON.parse(localStorage.getItem('schedule')) || [];
-
     
-    
-    //add current scheule to new array
+    //check to see if the schedule has changed or been updated
     loadSchedule.push({
-        description: scheduleDescription
+        description: scheduleDescription,
+        identifier: descriptionId
     });
+
+    var newLoadSchedule = Array.from(loadSchedule.reduce((map, obj) => map.set(obj.identifier, obj) ,new Map()));
+
+    console.log(newLoadSchedule);
+    
+    
+    
     
     //save item to local storage
-    localStorage.setItem('schedule', JSON.stringify(loadSchedule));
+    localStorage.setItem('schedule', JSON.stringify(newLoadSchedule));
 
+    //renderDescription(descriptionId);
 }
 $('.saveBtn').on('click', saveDescription);
 
 
-
-
-
-
-var renderDescription = function() {
+var renderDescription = function(descriptionId) {
     //pull out description data
-    var description = JSON.parse(localStorage.getItem('schedule'));
+    var loadSchedule = JSON.parse(localStorage.getItem('schedule'));
 
-    // for (i = 0; description.length; i++) {
-    //     $('.description').append(description[i]);
-    // }
-
-
-    for(i = 0; i <= 8; i++) {
-        
-        var timeSlot = moment('9:00:00').add(i, 'hours').format('hA');
-
-        $('#' + i).prepend(timeSlot);
-            
+    if(loadSchedule.identifier == $('.row').attr('id')) {
+            $('#' + loadSchedule[descriptionId].identifier + '.description').text(loadSchedule[descriptionId].description);
     }
+    
+    
+    
+    //for(i = 0; i <= loadSchedule.length; i++) {
+        
+        //if(loadSchedule[i].identifier == $('.row').attr('id')) {
+            // $('#' + loadSchedule[i].identifier + '.description').text(loadSchedule[i].description);
+    //     }
+    // }
 }
-//renderDescription();
+
 
 //clear local storage at midnight
 
