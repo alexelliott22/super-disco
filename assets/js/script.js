@@ -3,31 +3,43 @@ var checkForCurrentDay = function() {
     var currentDay = moment().format('dddd, MMM Do');
 
     $('#currentDay').append(currentDay);
+
+
 }
 checkForCurrentDay();
 
 //run an interval to check if the day has changed while the calendar is open
 setInterval(checkForCurrentDay, (1000 * 60) * (60 * 2));
 
+
 //check time and update input color
 var checkTime = function() {
-    
-    //apply new class based on time
-  if (moment().isAfter(convertedTime)) {
-    $('.description').addClass('past');
-    $('.description').removeClass('present');
-  }
-  else if(moment().isBefore(convertedTime)) {
-    $('.description').addClass('future');
-  }
-  else {
-      $('.description').addClass('present');
-      $('.description').removeClass('future');
-  }
+
+    for(i = 0; i <= 8; i++) {
+        var currentTime = $('#' + i + ' .hour').text();
+
+        var convertedTime = moment(currentTime, 'hA').format('h:mm A');
+
+        console.log(convertedTime);
+
+        //apply new class & styles based on time slot
+      if (moment().isAfter(convertedTime)) {
+        $('#' + i + '.description').addClass('past');
+        $('#' + i + '.description').removeClass('present');
+      }
+      else if(moment().isBefore(convertedTime)) {
+        $('#' + i + '.description').addClass('future');
+      }
+      else if (moment() == convertedTime) {
+          $('#' + i + '.description').addClass('present');
+          $('#' + i + '.description').removeClass('future');
+      }
+    }
 }
-// checkTime();
+checkTime();
 
-
+//check the time slots every 5 min
+setInterval(checkTime, (1000*60) * 5);
 
 
 
@@ -68,9 +80,15 @@ var renderDescription = function() {
     // }
 
 
+    for(i = 0; i <= 8; i++) {
+        
+        var timeSlot = moment('9:00:00').add(i, 'hours').format('hA');
 
+        $('#' + i).prepend(timeSlot);
+            
+    }
 }
-renderDescription();
+//renderDescription();
 
 //clear local storage at midnight
 
