@@ -1,99 +1,115 @@
-//add current day to header
-var checkForCurrentDay = function() {
-    var currentDay = moment().format('dddd, MMM Do');
+//clear local storage at midnight
+var changeDate = function(currentDay) {
 
-    $('#currentDay').append(currentDay);
+    var changeTime = moment(currentDay, 'L').set('hour', 21);
 
+    if(moment().isAfter(changeTime)) {
 
+        //remove items from local storage
+        localStorage.removeItem('schedule');
+
+        //remove classes from items
+        $('.description').removeClass('past');
+        $('.description').removeClass('present');
+    }
 }
-checkForCurrentDay();
+
+//add current day to header
+var displayCurrentDay = function() {
+    var currentDay = moment();
+    
+    var formattedDay = currentDay.format('dddd, MMM Do');
+
+    $('#currentDay').append(formattedDay);
+
+
+    changeDate(currentDay);
+    
+}
+displayCurrentDay();
 
 //run an interval to check if the day has changed while the calendar is open
-setInterval(checkForCurrentDay, (1000 * 60) * (60 * 2));
+setInterval(displayCurrentDay, (1000 * 60) * (60 * 2));
+
 
 
 //check time and update input color
 var checkTime = function() {
 
     for(i = 0; i <= 8; i++) {
-        var currentTime = $('#' + i + ' .hour').text();
+        var currentTime = $('#' + i + ' .hour').text().trim();
 
-        var convertedTime = moment(currentTime, 'hA').format('hh:mm:ss');
+        var convertedTime = moment(currentTime, 'hA');
 
-        console.log(convertedTime);
-
-        //apply new class & styles based on time slot
-      if (convertedTime.isAfter(moment())) {
-        $('#' + i + '.description').addClass('past');
-        $('#' + i + '.description').removeClass('present');
-      }
-      else if(convertedTime.isBefore(moment())) {
-        $('#' + i + '.description').addClass('future');
-      }
-      else if (moment().isSame(convertedTime)) {
-          $('#' + i + '.description').addClass('present');
-          $('#' + i + '.description').removeClass('future');
+        if (moment().hour() == convertedTime.hour()) {
+            $('#' + i + ' .description').addClass('present');
+            $('#' + i + ' .description').removeClass('future');
+        }
+        else if(moment().isBefore(convertedTime)) {
+            $('#' + i + ' .description').addClass('future');
+          }
+        else {
+            $('#' + i + ' .description').addClass('past');
+            $('#' + i + ' .description').removeClass('present');
       }
     }
 }
-//checkTime();
+checkTime();
 
 //check the time slots every 5 min
-//setInterval(checkTime, (1000*60) * 5);
+setInterval(checkTime, (1000 * 60) * 5);
 
 
 
 
 //save input information to local storage
 var saveDescription = function() {
+    
     //get the description of the time slot
-    var scheduleDescription = $('.description').val();
+    var scheduleDescription = $(this).siblings('.description').val();
+    
     //get the id of the parent
     var descriptionId = $(this).parent().attr('id');
-
 
     //load data from local storage
     var loadSchedule = JSON.parse(localStorage.getItem('schedule')) || [];
     
-    //check to see if the schedule has changed or been updated
+
+
+
+    //push newest save to loadschedule array
     loadSchedule.push({
         description: scheduleDescription,
         identifier: descriptionId
     });
-
-    var newLoadSchedule = Array.from(loadSchedule.reduce((map, obj) => map.set(obj.identifier, obj) ,new Map()));
-
-    console.log(newLoadSchedule);
-    
-    
-    
+  
     
     //save item to local storage
-    localStorage.setItem('schedule', JSON.stringify(newLoadSchedule));
+    localStorage.setItem('schedule', JSON.stringify(loadSchedule));
 
     //renderDescription(descriptionId);
 }
 $('.saveBtn').on('click', saveDescription);
 
 
-var renderDescription = function(descriptionId) {
+
+var renderDescription = function() {
     //pull out description data
-    var loadSchedule = JSON.parse(localStorage.getItem('schedule'));
+    var loadSchedule = JSON.parse(localStorage.getItem('schedule')) || [];
 
-    if(loadSchedule.identifier == $('.row').attr('id')) {
-            $('#' + loadSchedule[descriptionId].identifier + '.description').text(loadSchedule[descriptionId].description);
-    }
+
     
-    
-    
-    //for(i = 0; i <= loadSchedule.length; i++) {
+    for(i = 0; i < loadSchedule.length; i++) {
         
-        //if(loadSchedule[i].identifier == $('.row').attr('id')) {
-            // $('#' + loadSchedule[i].identifier + '.description').text(loadSchedule[i].description);
-    //     }
-    // }
+
+        for (c = 0; c < $('.row').length; c++) {
+
+            if(loadSchedule[i].identifier == $('.row')[c].id) {
+
+                $('#' + loadSchedule[i].identifier).children('.description').val(loadSchedule[i].description);
+
+            }
+        }
+    }
 }
-
-
-//clear local storage at midnight
-
+renderDescription();
