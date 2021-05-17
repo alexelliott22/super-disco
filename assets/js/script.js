@@ -73,9 +73,6 @@ var saveDescription = function() {
 
     //load data from local storage
     var loadSchedule = JSON.parse(localStorage.getItem('schedule')) || [];
-    
-
-
 
     //push newest save to loadschedule array
     loadSchedule.push({
@@ -86,8 +83,6 @@ var saveDescription = function() {
     
     //save item to local storage
     localStorage.setItem('schedule', JSON.stringify(loadSchedule));
-
-    //renderDescription(descriptionId);
 }
 $('.saveBtn').on('click', saveDescription);
 
@@ -98,10 +93,10 @@ var renderDescription = function() {
     var loadSchedule = JSON.parse(localStorage.getItem('schedule')) || [];
 
 
-    
+    //loop through the array created from the user input
     for(i = 0; i < loadSchedule.length; i++) {
         
-
+        //loop through the array of time slots to see which one matches the user input slot
         for (c = 0; c < $('.row').length; c++) {
 
             if(loadSchedule[i].identifier == $('.row')[c].id) {
